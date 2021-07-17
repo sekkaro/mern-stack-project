@@ -1,4 +1,5 @@
 import { Table } from "react-bootstrap";
+import PropTypes from "prop-types";
 
 const TicketTable = ({ tickets }) => {
   return (
@@ -13,9 +14,9 @@ const TicketTable = ({ tickets }) => {
       </thead>
       <tbody>
         {tickets.length ? (
-          tickets.map((ticket) => (
+          tickets.map((ticket, idx) => (
             <tr key={ticket.id}>
-              <td>{ticket.id}</td>
+              <td>{(idx + 1).toString()}</td>
               <td>{ticket.subject}</td>
               <td>{ticket.status}</td>
               <td>{ticket.addedAt}</td>
@@ -31,6 +32,10 @@ const TicketTable = ({ tickets }) => {
       </tbody>
     </Table>
   );
+};
+
+TicketTable.propTypes = {
+  tickets: PropTypes.array.isRequired,
 };
 
 export default TicketTable;
