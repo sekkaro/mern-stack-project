@@ -1,14 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import PageBreadcrumb from "../../components/breadcrumb/PageBreadcrumb";
 import tickets from "../../assets/data/dummy-tickets.json";
 import MessageHistory from "../../components/message-history/MessageHistory";
 import UpdateTicket from "../../components/update-ticket/UpdateTicket";
-
-const ticket = tickets[0];
+import { useParams } from "react-router-dom";
 
 const Ticket = () => {
+  const { tid } = useParams();
   const [message, setMessage] = useState("");
+  const [ticket, setTicket] = useState();
+
+  useEffect(() => {
+    const newTicket = tickets.find((ticket) => ticket.id === parseInt(tid));
+    setTicket(newTicket);
+  }, [tid]);
 
   const onChangeHandler = (e) => {
     setMessage(e.target.value);
@@ -28,9 +34,9 @@ const Ticket = () => {
       </Row>
       <Row>
         <Col className="font-weight-bolder text-secondary">
-          <div className="subject">Subject: {ticket.subject}</div>
-          <div className="date">Ticket Opened: {ticket.addedAt}</div>
-          <div className="status">Status: {ticket.status}</div>
+          <div className="subject">Subject: {ticket?.subject}</div>
+          <div className="date">Ticket Opened: {ticket?.addedAt}</div>
+          <div className="status">Status: {ticket?.status}</div>
         </Col>
         <Col className="text-right">
           <Button variant="outline-info">Close Ticket</Button>
@@ -38,7 +44,7 @@ const Ticket = () => {
       </Row>
       <Row className="mt-4">
         <Col>
-          <MessageHistory messages={ticket.history} />
+          {ticket?.history && <MessageHistory messages={ticket.history} />}
         </Col>
       </Row>
       <hr />

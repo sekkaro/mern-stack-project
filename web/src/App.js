@@ -1,21 +1,34 @@
+import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
 import "./App.css";
-import DefaultLayout from "./layout/DefaultLayout";
-import AddTicket from "./pages/add-ticket/AddTicket";
-import Dashboard from "./pages/dashboard/Dashboard";
-import Entry from "./pages/entry/Entry";
-import TicketList from "./pages/ticket-list/TicketList";
 import Ticket from "./pages/ticket/Ticket";
+import Dashboard from "./pages/dashboard/Dashboard";
+import AddTicket from "./pages/add-ticket/AddTicket";
+import TicketList from "./pages/ticket-list/TicketList";
+import Entry from "./pages/entry/Entry";
+import PrivateRoute from "./components/private-route/PrivateRoute";
 
 function App() {
   return (
     <div className="App">
-      {/* <Entry /> */}
-      <DefaultLayout>
-        {/* <Dashboard /> */}
-        {/* <AddTicket /> */}
-        {/* <TicketList /> */}
-        <Ticket />
-      </DefaultLayout>
+      <Router>
+        <Switch>
+          <Route exact path="/">
+            <Entry />
+          </Route>
+          <PrivateRoute path="/dashboard">
+            <Dashboard />
+          </PrivateRoute>
+          <PrivateRoute path="/add-ticket">
+            <AddTicket />
+          </PrivateRoute>
+          <PrivateRoute path="/tickets">
+            <TicketList />
+          </PrivateRoute>
+          <PrivateRoute path="/ticket/:tid">
+            <Ticket />
+          </PrivateRoute>
+        </Switch>
+      </Router>
     </div>
   );
 }

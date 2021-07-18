@@ -1,5 +1,6 @@
 import { Table } from "react-bootstrap";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 
 const TicketTable = ({ tickets }) => {
   return (
@@ -16,8 +17,10 @@ const TicketTable = ({ tickets }) => {
         {tickets.length ? (
           tickets.map((ticket, idx) => (
             <tr key={ticket.id}>
-              <td>{(idx + 1).toString()}</td>
-              <td>{ticket.subject}</td>
+              <td>{idx + 1}</td>
+              <td>
+                <Link to={`/ticket/${ticket.id}`}>{ticket.subject}</Link>
+              </td>
               <td>{ticket.status}</td>
               <td>{ticket.addedAt}</td>
             </tr>
