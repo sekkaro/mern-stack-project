@@ -27,3 +27,11 @@ export const getJWT = (key) => {
     }
   });
 };
+
+export const deleteJWT = (key) => {
+  try {
+    client.del(key);
+  } catch (err) {
+    console.log(err);
+  }
+};

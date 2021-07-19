@@ -2,7 +2,11 @@ import express from "express";
 import User from "../models/User";
 import bcrypt from "bcrypt";
 import { errorHandler, throwError } from "../utils/errorHandler";
-import { createAccessJWT, createRefreshJWT } from "../utils/jwt";
+import {
+  createAccessJWT,
+  createRefreshJWT,
+  verifyRefreshJWT,
+} from "../utils/jwt";
 import { userAuth } from "../middlewares/authorization";
 
 const router = express.Router();
@@ -80,6 +84,42 @@ router.get("/me", userAuth, async (req, res) => {
   } catch (err) {
     errorHandler(err, res);
   }
+});
+
+// refresh token
+router.get("/refresh-token", async (req, res) => {
+  const { authorization } = req.headers;
+
+  const decoded = await verifyRefreshJWT(authorization);
+
+  if (decoded.email) {
+    const user = await User.findOne({
+      email: decoded.email,
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "user not found" });
+    }
+
+    let tokenExp = user.refreshJWT.addedAt;
+    const refreshToken = user.refreshJWT.token;
+
+    tokenExp = tokenExp.setDate(
+      tokenExp.getDate() + +process.env.JWT_REFRESH_SECRET_EXP_DAY
+    );
+
+    const today = new Date();
+
+    if (refreshToken !== authorization || tokenExp < today) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    const accessJWT = await createAccessJWT(decoded.email, `${user._id}`);
+
+    return res.status(200).json({ accessJWT });
+  }
+
+  res.status(403).json({ message: "Forbidden" });
 });
 
 export default router;

@@ -36,6 +36,14 @@ export const verifyAccessJWT = (token) => {
   try {
     return Promise.resolve(jwt.verify(token, process.env.JWT_ACCESS_SECRET));
   } catch (err) {
-    return Promise.reject(err);
+    return Promise.resolve(err);
+  }
+};
+
+export const verifyRefreshJWT = (token) => {
+  try {
+    return Promise.resolve(jwt.verify(token, process.env.JWT_REFRESH_SECRET));
+  } catch (err) {
+    return Promise.resolve(err);
   }
 };
