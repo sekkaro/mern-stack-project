@@ -31,6 +31,18 @@ const UserSchema = new mongoose.Schema({
     maxLength: 100,
     required: true,
   },
+  refreshJWT: {
+    token: {
+      type: String,
+      maxLength: 500,
+      default: "",
+    },
+    addedAt: {
+      type: Date,
+      required: true,
+      default: Date.now(),
+    },
+  },
 });
 
 // const UserSchema = new mongoose.Schema(

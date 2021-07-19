@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import User from "../models/User";
 import { setJWT } from "./redis";
 
 export const createAccessJWT = async (email, id) => {
@@ -11,5 +12,22 @@ export const createAccessJWT = async (email, id) => {
   return accessJWT;
 };
 
-export const createRefreshJWT = (payload) =>
-  jwt.sign({ payload }, process.env.JWT_REFRESH_SECRET, { expiresIn: "30d" });
+export const createRefreshJWT = async (email, id) => {
+  const refreshJWT = jwt.sign({ email }, process.env.JWT_REFRESH_SECRET, {
+    expiresIn: "30d",
+  });
+
+  // store user refresh jwt
+  await User.findOneAndUpdate(
+    { _id: id },
+    {
+      $set: {
+        "refreshJWT.token": refreshJWT,
+        "refreshJWT.addedAt": Date.now(),
+      },
+    },
+    { new: true }
+  );
+
+  return refreshJWT;
+};
