@@ -59,7 +59,7 @@ router.post("/login", async (req, res) => {
       throwError("wrong password", 403);
     }
 
-    const accessJWT = createAccessJWT(user.email);
+    const accessJWT = await createAccessJWT(user.email, `${user._id}`);
     const refreshJWT = createRefreshJWT(user.email);
     res.status(200).json({ accessJWT, refreshJWT });
   } catch (err) {
