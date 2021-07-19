@@ -31,3 +31,11 @@ export const createRefreshJWT = async (email, id) => {
 
   return refreshJWT;
 };
+
+export const verifyAccessJWT = (token) => {
+  try {
+    return Promise.resolve(jwt.verify(token, process.env.JWT_ACCESS_SECRET));
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};

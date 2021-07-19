@@ -3,6 +3,7 @@ import User from "../models/User";
 import bcrypt from "bcrypt";
 import { errorHandler, throwError } from "../utils/errorHandler";
 import { createAccessJWT, createRefreshJWT } from "../utils/jwt";
+import { userAuth } from "../middlewares/authorization";
 
 const router = express.Router();
 
@@ -35,8 +36,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// // login
-
+// login
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -62,6 +62,21 @@ router.post("/login", async (req, res) => {
     const accessJWT = await createAccessJWT(user.email, `${user._id}`);
     const refreshJWT = await createRefreshJWT(user.email, `${user._id}`);
     res.status(200).json({ accessJWT, refreshJWT });
+  } catch (err) {
+    errorHandler(err, res);
+  }
+});
+
+// me
+router.get("/me", userAuth, async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.userId });
+
+    if (!user) {
+      throwError("user not found", 404);
+    }
+
+    res.status(200).json(user);
   } catch (err) {
     errorHandler(err, res);
   }
