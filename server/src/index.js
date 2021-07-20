@@ -10,6 +10,7 @@ import userRoute from "./routes/users";
 import authRoute from "./routes/auth";
 import postRoute from "./routes/posts";
 import ticketRoute from "./routes/tickets";
+import { __prod__ } from "./constants";
 
 const main = () => {
   const app = express();
@@ -24,7 +25,7 @@ const main = () => {
   app.use(express.json());
   app.use(helmet());
   app.use(cors());
-  if (process.env.NODE_ENV !== "production") {
+  if (!__prod__) {
     app.use(morgan("common"));
   }
   app.use(bodyParser.urlencoded({ extended: true }));

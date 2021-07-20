@@ -9,20 +9,19 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendEmail = (email, pin) => {
+export const sendEmail = (email, link) => {
   try {
     transporter.sendMail({
       from: '"CRM Company" <elmira.pagac@ethereal.email>', // sender address
       to: email, // list of receivers
-      subject: "Password Reset Pin", // Subject line
+      subject: "Password Reset Link", // Subject line
       text:
-        "Here is your password reset pin " +
-        pin +
-        "\nThis pin will expire in a day.", // plain text body
-      html: `<b>Hello world?</b>
-            Here is your pin
-            <b>${pin}</b>
-            This pin will expire in a day
+        "Here is your password reset link\n" +
+        link +
+        "\nThis link will expire in a day.", // plain text body
+      html: `<b>Reset password link</b>
+            <a href="${link}">reset password</a>
+            This link will expire in a day
             <p></p>`, // html body
     });
 

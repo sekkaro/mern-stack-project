@@ -1,5 +1,6 @@
 import express from "express";
 import bcrypt from "bcrypt";
+import { v4 } from "uuid";
 import User from "../models/User";
 import Reset from "../models/Reset";
 import { errorHandler, throwError } from "../utils/errorHandler";
@@ -11,6 +12,8 @@ import {
 import { userAuth } from "../middlewares/authorization";
 import { createResetPin } from "../utils/createResetPin";
 import { sendEmail } from "../utils/email";
+import { redisDelete, redisGet, redisSet } from "../utils/redis";
+import { FORGET_PASSWORD_PREFIX } from "../constants";
 
 const router = express.Router();
 
@@ -131,21 +134,59 @@ router.post("/reset-password", async (req, res) => {
   const user = await User.findOne({ email });
 
   if (user) {
-    const pin = createResetPin(6);
-    const reset = new Reset({
-      email,
-      pin,
-    });
+    const token = v4();
+    await redisSet(FORGET_PASSWORD_PREFIX + token, user.id, 60 * 60 * 24);
+    sendEmail(email, `${process.env.HOST}/change-password/${token}`);
+    // const pin = createResetPin(6);
+    // const reset = new Reset({
+    //   email,
+    //   pin,
+    // });
 
-    await reset.save();
+    // await reset.save();
 
-    sendEmail(email, pin);
+    // sendEmail(email, pin);
   }
 
   res.status(200).json({
     message:
       "If the email exists, the password reset pin will be sent shortly.",
   });
+});
+
+router.post("/change-password", async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    const key = FORGET_PASSWORD_PREFIX + token;
+
+    const userId = await redisGet(key);
+
+    if (!userId) {
+      throwError("expired token", 401);
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await User.findOneAndUpdate(
+      { _id: userId },
+      {
+        $set: {
+          password: hashedPassword,
+        },
+      },
+      { new: true }
+    );
+
+    redisDelete(key);
+
+    res.status(200).json({
+      message: "password reset successful",
+    });
+  } catch (err) {
+    errorHandler(err, res);
+  }
 });
 
 export default router;

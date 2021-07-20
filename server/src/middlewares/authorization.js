@@ -1,5 +1,5 @@
 import { verifyAccessJWT } from "../utils/jwt";
-import { deleteJWT, getJWT } from "../utils/redis";
+import { redisDelete, redisGet } from "../utils/redis";
 
 export const userAuth = async (req, res, next) => {
   const { authorization } = req.headers;
@@ -7,7 +7,7 @@ export const userAuth = async (req, res, next) => {
   const decoded = await verifyAccessJWT(authorization);
 
   if (decoded.email) {
-    const userId = await getJWT(authorization);
+    const userId = await redisGet(authorization);
 
     if (!userId) {
       return res.status(403).send({ message: "Forbidden" });
@@ -18,6 +18,6 @@ export const userAuth = async (req, res, next) => {
     return next();
   }
 
-  deleteJWT(authorization);
+  redisDelete(authorization);
   return res.status(403).send({ message: "Forbidden" });
 };

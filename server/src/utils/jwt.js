@@ -1,13 +1,13 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User";
-import { setJWT } from "./redis";
+import { redisSet } from "./redis";
 
 export const createAccessJWT = async (email, id) => {
   const accessJWT = jwt.sign({ email }, process.env.JWT_ACCESS_SECRET, {
     expiresIn: "15m",
   });
 
-  await setJWT(accessJWT, id);
+  await redisSet(accessJWT, id);
 
   return accessJWT;
 };
