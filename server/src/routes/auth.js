@@ -1,24 +1,22 @@
-import express from "express";
 import bcrypt from "bcrypt";
+import express from "express";
 import { v4 } from "uuid";
+import { FORGET_PASSWORD_PREFIX } from "../constants";
+import { userAuth } from "../middlewares/authorization";
+import {
+  loginValidation,
+  registerValidation,
+  resetPasswordValidation,
+} from "../middlewares/validation";
 import User from "../models/User";
-import Reset from "../models/Reset";
+import { sendEmail } from "../utils/email";
 import { errorHandler, throwError } from "../utils/errorHandler";
 import {
   createAccessJWT,
   createRefreshJWT,
   verifyRefreshJWT,
 } from "../utils/jwt";
-import { userAuth } from "../middlewares/authorization";
-import { createResetPin } from "../utils/createResetPin";
-import { sendEmail } from "../utils/email";
 import { redisDelete, redisGet, redisSet } from "../utils/redis";
-import { FORGET_PASSWORD_PREFIX } from "../constants";
-import {
-  loginValidation,
-  registerValidation,
-  resetPasswordValidation,
-} from "../middlewares/validation";
 
 const router = express.Router();
 
@@ -192,6 +190,31 @@ router.post("/change-password", async (req, res) => {
     res.status(200).json({
       message: "password reset successful",
     });
+  } catch (err) {
+    errorHandler(err, res);
+  }
+});
+
+router.delete("/logout", userAuth, async (req, res) => {
+  try {
+    const { authorization } = req.headers;
+
+    const userId = req.userId;
+
+    redisDelete(authorization);
+
+    await User.findOneAndUpdate(
+      { _id: userId },
+      {
+        $set: {
+          "refreshJWT.token": "",
+          "refreshJWT.addedAt": Date.now(),
+        },
+      },
+      { new: true }
+    );
+
+    res.status(200).send("success");
   } catch (err) {
     errorHandler(err, res);
   }
