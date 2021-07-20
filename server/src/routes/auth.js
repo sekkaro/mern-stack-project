@@ -1,6 +1,7 @@
 import express from "express";
-import User from "../models/User";
 import bcrypt from "bcrypt";
+import User from "../models/User";
+import Reset from "../models/Reset";
 import { errorHandler, throwError } from "../utils/errorHandler";
 import {
   createAccessJWT,
@@ -8,6 +9,8 @@ import {
   verifyRefreshJWT,
 } from "../utils/jwt";
 import { userAuth } from "../middlewares/authorization";
+import { createResetPin } from "../utils/createResetPin";
+import { sendEmail } from "../utils/email";
 
 const router = express.Router();
 
@@ -120,6 +123,29 @@ router.get("/refresh-token", async (req, res) => {
   }
 
   res.status(403).json({ message: "Forbidden" });
+});
+
+router.post("/reset-password", async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (user) {
+    const pin = createResetPin(6);
+    const reset = new Reset({
+      email,
+      pin,
+    });
+
+    await reset.save();
+
+    sendEmail(email, pin);
+  }
+
+  res.status(200).json({
+    message:
+      "If the email exists, the password reset pin will be sent shortly.",
+  });
 });
 
 export default router;
