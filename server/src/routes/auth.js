@@ -14,15 +14,20 @@ import { createResetPin } from "../utils/createResetPin";
 import { sendEmail } from "../utils/email";
 import { redisDelete, redisGet, redisSet } from "../utils/redis";
 import { FORGET_PASSWORD_PREFIX } from "../constants";
+import {
+  loginValidation,
+  registerValidation,
+  resetPasswordValidation,
+} from "../middlewares/validation";
 
 const router = express.Router();
 
 // register
-router.post("/register", async (req, res) => {
+router.post("/register", registerValidation, async (req, res) => {
   try {
-    if (!req.body.password) {
-      throwError("password is required", 400);
-    }
+    // if (!req.body.password) {
+    //   throwError("password is required", 400);
+    // }
     // generate new password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -47,26 +52,27 @@ router.post("/register", async (req, res) => {
 });
 
 // login
-router.post("/login", async (req, res) => {
+router.post("/login", loginValidation, async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      throwError("invalid form", 400);
-    }
+    // if (!email || !password) {
+    //   throwError("invalid form", 400);
+    // }
 
     const user = await User.findOne({
       email,
     });
 
     if (!user) {
-      throwError("user not found", 404);
+      // throwError("user not found", 404);
+      throwError("wrong email or password", 403);
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
 
     if (!validPassword) {
-      throwError("wrong password", 403);
+      throwError("wrong email or password", 403);
     }
 
     const accessJWT = await createAccessJWT(user.email, `${user._id}`);
@@ -86,7 +92,9 @@ router.get("/me", userAuth, async (req, res) => {
       throwError("user not found", 404);
     }
 
-    res.status(200).json(user);
+    const { password, ...others } = user._doc;
+
+    res.status(200).json(others);
   } catch (err) {
     errorHandler(err, res);
   }
@@ -128,7 +136,7 @@ router.get("/refresh-token", async (req, res) => {
   res.status(403).json({ message: "Forbidden" });
 });
 
-router.post("/reset-password", async (req, res) => {
+router.post("/reset-password", resetPasswordValidation, async (req, res) => {
   const { email } = req.body;
 
   const user = await User.findOne({ email });
