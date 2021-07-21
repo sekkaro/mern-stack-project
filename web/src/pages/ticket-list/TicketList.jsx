@@ -1,28 +1,39 @@
-import { useState } from "react";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import { useEffect } from "react";
+import { Button, Col, Container, Row } from "react-bootstrap";
+import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
+// import tickets from "../../assets/data/dummy-tickets.json";
 import PageBreadcrumb from "../../components/breadcrumb/PageBreadcrumb";
 import SearchForm from "../../components/search-form/SearchForm";
 import TicketTable from "../../components/ticket-table/TicketTable";
-import tickets from "../../assets/data/dummy-tickets.json";
-import { Link } from "react-router-dom";
+import { fetchAllTickets } from "./ticketsAction";
 
 const TicketList = () => {
-  const [keyword, setKeyword] = useState("");
-  const [displayTickets, setDisplayTickets] = useState(tickets);
+  const dispatch = useDispatch();
 
-  const onChangeHandler = (e) => {
-    const { value } = e.target;
-    setKeyword(value);
-    searchTicket(value);
-  };
+  useEffect(() => {
+    dispatch(fetchAllTickets());
+  }, [dispatch]);
+  // const [keyword, setKeyword] = useState("");
+  // const [displayTickets, setDisplayTickets] = useState(tickets);
 
-  const searchTicket = (keyword) => {
-    const displayTickets = tickets.filter((ticket) =>
-      ticket.subject.toLowerCase().includes(keyword.toLowerCase())
-    );
+  // useEffect(() => {
+  //   setDisplayTickets(tickets);
+  // }, [tickets]);
 
-    setDisplayTickets(displayTickets);
-  };
+  // const onChangeHandler = (e) => {
+  //   const { value } = e.target;
+  //   setKeyword(value);
+  //   searchTicket(value);
+  // };
+
+  // const searchTicket = (keyword) => {
+  //   const displayTickets = tickets.filter((ticket) =>
+  //     ticket.subject.toLowerCase().includes(keyword.toLowerCase())
+  //   );
+
+  //   setDisplayTickets(displayTickets);
+  // };
   return (
     <Container>
       <Row>
@@ -37,13 +48,13 @@ const TicketList = () => {
           </Link>
         </Col>
         <Col className="text-right">
-          <SearchForm onChange={onChangeHandler} keyword={keyword} />
+          <SearchForm />
         </Col>
       </Row>
       <hr />
       <Row>
         <Col>
-          <TicketTable tickets={displayTickets} />
+          <TicketTable />
         </Col>
       </Row>
     </Container>

@@ -1,7 +1,21 @@
+import { useEffect, useState } from "react";
 import { Col, Form, Row } from "react-bootstrap";
-import PropTypes from "prop-types";
+import { useDispatch } from "react-redux";
+import { filterSearchTicket } from "../../pages/ticket-list/ticketsAction";
 
-const SearchForm = ({ onChange, keyword }) => {
+const SearchForm = () => {
+  const dispatch = useDispatch();
+  const [keyword, setKeyword] = useState("");
+
+  useEffect(() => {
+    dispatch(filterSearchTicket(keyword));
+  }, [dispatch, keyword]);
+
+  const onChange = (e) => {
+    const { value } = e.target;
+    setKeyword(value);
+  };
+
   return (
     <div>
       <Form>
@@ -21,11 +35,6 @@ const SearchForm = ({ onChange, keyword }) => {
       </Form>
     </div>
   );
-};
-
-SearchForm.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  keyword: PropTypes.string.isRequired,
 };
 
 export default SearchForm;
