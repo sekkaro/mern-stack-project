@@ -18,6 +18,8 @@ export const userAuth = async (req, res, next) => {
     return next();
   }
 
-  redisDelete(authorization);
+  if (authorization) {
+    redisDelete(authorization);
+  }
   return res.status(403).send({ message: "Forbidden" });
 };
