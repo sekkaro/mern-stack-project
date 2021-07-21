@@ -1,12 +1,16 @@
 import express from "express";
 import { userAuth } from "../middlewares/authorization";
+import {
+  createTicketValidation,
+  replyTicketValidation,
+} from "../middlewares/validation";
 import Ticket from "../models/Ticket";
 import { errorHandler } from "../utils/errorHandler";
 
 const router = express.Router();
 
 // create new ticket
-router.post("/", userAuth, async (req, res) => {
+router.post("/", userAuth, createTicketValidation, async (req, res) => {
   try {
     const { subject, sender, message } = req.body;
 
@@ -56,7 +60,7 @@ router.get("/:tid", userAuth, async (req, res) => {
 });
 
 // update reply message from client
-router.put("/:tid", userAuth, async (req, res) => {
+router.put("/:tid", userAuth, replyTicketValidation, async (req, res) => {
   try {
     const { message, sender } = req.body;
     const tId = req.params.tid;
