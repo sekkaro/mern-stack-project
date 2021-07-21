@@ -55,4 +55,64 @@ router.get("/:tid", userAuth, async (req, res) => {
   }
 });
 
+// update reply message from client
+router.put("/:tid", userAuth, async (req, res) => {
+  try {
+    const { message, sender } = req.body;
+    const tId = req.params.tid;
+    const clientId = req.userId;
+
+    const ticket = await Ticket.findOneAndUpdate(
+      { _id: tId, clientId },
+      {
+        $push: {
+          conversations: {
+            message,
+            sender,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    res.status(200).json(ticket);
+  } catch (err) {
+    errorHandler(err, res);
+  }
+});
+
+// update ticket status to close
+router.patch("/close-ticket/:tid", userAuth, async (req, res) => {
+  try {
+    const tId = req.params.tid;
+    const clientId = req.userId;
+
+    const ticket = await Ticket.findOneAndUpdate(
+      { _id: tId, clientId },
+      {
+        status: "Closed",
+      },
+      { new: true }
+    );
+
+    res.status(200).json(ticket);
+  } catch (err) {
+    errorHandler(err, res);
+  }
+});
+
+// Delete a ticket
+router.delete("/:tid", userAuth, async (req, res) => {
+  try {
+    const tId = req.params.tid;
+    const clientId = req.userId;
+
+    await Ticket.findOneAndDelete({ _id: tId, clientId });
+
+    res.status(200).send("success");
+  } catch (err) {
+    errorHandler(err, res);
+  }
+});
+
 export default router;
