@@ -41,4 +41,18 @@ router.get("/", userAuth, async (req, res) => {
   }
 });
 
+// get a ticket
+router.get("/:tid", userAuth, async (req, res) => {
+  try {
+    const tId = req.params.tid;
+    const clientId = req.userId;
+
+    const ticket = await Ticket.findOne({ _id: tId, clientId });
+
+    res.status(200).json(ticket);
+  } catch (err) {
+    errorHandler(err, res);
+  }
+});
+
 export default router;
