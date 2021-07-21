@@ -5,6 +5,7 @@ import { errorHandler } from "../utils/errorHandler";
 
 const router = express.Router();
 
+// create new ticket
 router.post("/", userAuth, async (req, res) => {
   try {
     const { subject, sender, message } = req.body;
@@ -18,6 +19,24 @@ router.post("/", userAuth, async (req, res) => {
     const savedTicket = await ticket.save();
     res.status(200).json(savedTicket);
   } catch (error) {
+    errorHandler(err, res);
+  }
+});
+
+// get all tickets for a specific user
+router.get("/", userAuth, async (req, res) => {
+  try {
+    const clientId = req.userId;
+
+    const result = await Ticket.find({ clientId });
+
+    // const tickets = result.map((ticket) => {
+    //   const { clientId, ...others } = ticket._doc;
+    //   return others;
+    // });
+
+    res.status(200).json(result);
+  } catch (err) {
     errorHandler(err, res);
   }
 });
